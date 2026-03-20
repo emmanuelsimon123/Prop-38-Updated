@@ -1,0 +1,68 @@
+<svg id="diagram" viewBox="0 0 840 520" role="img" aria-labelledby="diagramTitle diagramDesc" xmlns="http://www.w3.org/2000/svg">
+  <title id="diagramTitle">Diagram for Proposition I.40</title>
+  <desc id="diagramDesc">Equal triangles ABC and DCE on equal bases BC and CE on the same side. Join AD. Assume AD not parallel BE, draw AF parallel BE meeting DE produced at F, join FE (and FC for the triangle FCE).</desc>
+
+  <!-- Base line BE (faint guide), with BC and CE highlighted as equal bases -->
+  <line id="BE" x1="200" y1="360" x2="520" y2="360" stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="6 8"/>
+  <line id="BC" x1="200" y1="360" x2="360" y2="360" stroke="var(--svg-ink)" stroke-width="2"/>
+  <line id="CE" x1="360" y1="360" x2="520" y2="360" stroke="var(--svg-ink)" stroke-width="2"/>
+
+  <!-- Triangle ABC -->
+  <g id="triABC">
+    <line id="AB" x1="280" y1="140" x2="200" y2="360" stroke="var(--svg-ink)" stroke-width="2"/>
+    <line id="AC" x1="280" y1="140" x2="360" y2="360" stroke="var(--svg-ink)" stroke-width="2"/>
+  </g>
+
+  <!-- Triangle DCE -->
+  <g id="triDCE">
+    <line id="DC" x1="440" y1="200" x2="360" y2="360" stroke="var(--svg-ink)" stroke-width="2"/>
+    <line id="DE" x1="440" y1="200" x2="520" y2="360" stroke="var(--svg-ink)" stroke-width="2"/>
+  </g>
+
+  <!-- Join AD (hidden initially) -->
+  <line id="AD" class="hidden no-draw" aria-hidden="true"
+        x1="280" y1="140" x2="440" y2="200"
+        stroke="#64748b" stroke-width="2.5" stroke-dasharray="6 6"/>
+
+  <!-- AF through A parallel BE (hidden initially) -->
+  <line id="AF" class="hidden no-draw" aria-hidden="true"
+        x1="40" y1="140" x2="800" y2="140"
+        stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="6 8"/>
+
+  <!-- DE produced to meet AF at F (draw as DF extension; hidden initially) -->
+  <line id="DF" class="hidden no-draw" aria-hidden="true"
+        x1="440" y1="200" x2="395" y2="110"
+        stroke="#6b7280" stroke-width="2"/>
+
+  <!-- Join FE (hidden initially) -->
+  <line id="FE" class="hidden no-draw" aria-hidden="true"
+        x1="395" y1="110" x2="520" y2="360"
+        stroke="#6b7280" stroke-width="2"/>
+
+  <!-- Join FC (for triangle FCE; hidden initially) -->
+  <line id="FC" class="hidden no-draw" aria-hidden="true"
+        x1="395" y1="110" x2="360" y2="360"
+        stroke="#6b7280" stroke-width="2"/>
+
+  <!-- Point F marker (hidden initially) -->
+  <circle id="ptF" class="hidden" aria-hidden="true" cx="395" cy="110" r="4" fill="var(--svg-ink)"></circle>
+
+  <!-- Explore handles -->
+  <g id="explore-handles" class="hidden" aria-hidden="true">
+    <circle id="handleA_ring" class="handle-ring" cx="280" cy="140" r="14"></circle>
+    <circle id="handleA" class="handle" cx="280" cy="140" r="8" tabindex="0" aria-label="Drag point A"></circle>
+
+    <circle id="handleD_ring" class="handle-ring" cx="440" cy="200" r="14"></circle>
+    <circle id="handleD" class="handle" cx="440" cy="200" r="8" tabindex="0" aria-label="Drag point D"></circle>
+  </g>
+
+  <!-- Labels -->
+  <g id="labels" font-size="18" font-weight="bold" fill="var(--svg-ink)">
+    <text id="lblA" x="274" y="130">A</text>
+    <text id="lblB" x="190" y="385">B</text>
+    <text id="lblC" x="355" y="385">C</text>
+    <text id="lblD" x="434" y="190">D</text>
+    <text id="lblE" x="515" y="385">E</text>
+    <text id="lblF" class="hidden" aria-hidden="true" x="402" y="100">F</text>
+  </g>
+</svg>
