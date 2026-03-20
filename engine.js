@@ -285,10 +285,12 @@ const Explore = (() => {
     update();
   }
 
-  function update() {
-    if (!enabled) return;
+  // UPDATED: allow "force" update even when explore mode is OFF.
+  // This fixes hatch polygons being created with stale default points.
+  function update(force = false) {
+    if (!enabled && !force) return;
 
-    // Keep handles positioned
+    // Keep handles positioned (harmless even if hidden)
     const handles = LESSON?.explore?.handles || {};
     for (const key of Object.keys(handles)) {
       const h = handles[key];
@@ -298,7 +300,7 @@ const Explore = (() => {
       }
     }
 
-    // Let the lesson update the actual diagram
+    // Let the lesson update the actual diagram geometry + hatch points
     LESSON?.explore?.onUpdate?.(P, Diagram);
   }
 
@@ -481,7 +483,6 @@ const Proof = (() => {
       ? '<span aria-hidden="true">☀️</span> Light'
       : '<span aria-hidden="true">🌙</span> Dark';
     el.btnDark.setAttribute('aria-pressed', isDark ? 'true' : 'false');
-    el.btnDark.setAttribute('aria-label', isDark ? 'Disable dark mode' : 'Enable dark mode');
   }
 
   function prefersReducedMotion() {
@@ -653,7 +654,10 @@ const Proof = (() => {
     if (setHash) updateHash(index);
     if (scroll) scrollRowIfNeeded(row);
 
-    if (Explore.isEnabled()) Explore.update();
+    // UPDATED: always force a geometry sync (even when Explore is OFF)
+    // so hatch polygons (triABCfill etc.) align with the current points.
+    Explore.update(true);
+
     postHeight();
   }
 
