@@ -1,1 +1,394 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Euclid Interactive Proofs — Engine</title>
 
+  <!-- Confetti (optional) -->
+  <script defer src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --ink: #1f2937; --muted: #606b7d; --accent: #2b6cb0; --accent-2: #d97706;
+      --bg: #f9fafb; --hilite: #ef4444; --good: #16a34a; --focus: #7c3aed;
+      --board-bg: #fff; --border: #e5e7eb; --row-hover: #f8fafc; --row-active: #eef2ff;
+      --svg-ink: #111827; --svg-grid: #cbd5e1;
+    }
+
+    body.dark {
+      --ink: #f3f4f6; --muted: #9ca3af; --accent: #60a5fa; --accent-2: #fbbf24;
+      --bg: #111827; --board-bg: #1f2937; --border: #374151;
+      --row-hover: #374151; --row-active: #1e3a8a;
+      --svg-ink: #f9fafb; --svg-grid: #4b5563;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { overflow-x: hidden; overscroll-behavior: none; }
+    body {
+      font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0; background: var(--bg); color: var(--ink);
+      transition: background 0.3s, color 0.3s;
+    }
+
+    .header { padding: 1rem 1.25rem; background: var(--board-bg); border-bottom: 1px solid var(--border); }
+    .header h1 { margin: 0; font-size: 1.6rem; }
+    .subtitle { margin: .25rem 0 0; color: var(--muted); }
+
+    main.layout { display: grid; grid-template-columns: 1fr; gap: 1rem; padding: 1rem; max-width: 1200px; margin: 0 auto; }
+    @media (min-width: 980px) { main.layout { grid-template-columns: 1fr 1fr; } }
+
+    .board, .steps { background: var(--board-bg); border: 1px solid var(--border); border-radius: 8px; padding: .75rem; }
+    .board { display: flex; flex-direction: column; }
+    .steps { padding: 1rem; }
+
+    .controls { display: flex; gap: .5rem; align-items: center; margin-bottom: .5rem; flex-wrap: wrap; }
+    button, #mode-select {
+      padding: .5rem .75rem; border: 1px solid var(--border); border-radius: 6px;
+      background: var(--board-bg); color: var(--ink); cursor: pointer; font-weight: 700;
+      transition: all .2s; font-size: 0.9rem;
+    }
+    button:hover:not(:disabled), #mode-select:hover { transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,.1); }
+    button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+    button.primary:hover:not(:disabled) { background: #1e40af; }
+    body.dark button.primary:hover:not(:disabled) { background: #3b82f6; }
+    button:disabled { opacity: .5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .muted { color: var(--muted); }
+    .push-right { margin-left: auto; font-weight: 700; }
+
+    /* Progress bar (no thumb), keyboard accessible */
+    .progress-container {
+      width: 100%;
+      height: 12px;
+      background: var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: .5rem;
+      cursor: pointer;
+    }
+    .progress-container:hover { filter: brightness(0.95); }
+    .progress-container:focus { outline: 2px solid var(--focus); outline-offset: 3px; }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--good);
+      transition: width .25s cubic-bezier(.4,0,.2,1);
+      pointer-events: none;
+    }
+
+    .legend { font-size: .9rem; margin-bottom: .25rem; color: var(--muted); }
+    #layout-hint { margin: 0 0 .6rem; font-size: .9rem; font-weight: 800; }
+
+    .svg-wrapper { position: relative; width: 100%; flex-grow: 1; }
+    .svg-wrapper, #diagram, #explore-handles, .handle { touch-action: none; }
+    svg { width: 100%; height: auto; border-radius: 6px; background: var(--board-bg); display: block; }
+
+    .qed-stamp {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%) rotate(-10deg);
+      font-size: 4.5rem; font-weight: 900; letter-spacing: 4px; color: rgba(22,163,74,.85);
+      border: 8px solid rgba(22,163,74,.85); padding: 1rem 2.5rem; border-radius: 1rem;
+      pointer-events: none; backdrop-filter: blur(2px);
+      box-shadow: 0 10px 25px rgba(0,0,0,.2), inset 0 0 15px rgba(22,163,74,.3);
+      text-shadow: 2px 2px 0 rgba(255,255,255,.5);
+    }
+    .stamp-drop { animation: stampDrop .6s cubic-bezier(.175,.885,.32,1.275) forwards; }
+    @keyframes stampDrop { 0%{transform:translate(-50%,-50%) scale(3) rotate(-25deg);opacity:0} 100%{transform:translate(-50%,-50%) scale(1) rotate(-10deg);opacity:1} }
+
+    .coach-box {
+      margin-top: 0.5rem; padding: 0.85rem 1rem; background: rgba(59, 130, 246, 0.1);
+      border-left: 4px solid var(--accent); border-radius: 4px;
+      font-size: 1.02rem; line-height: 1.4; min-height: 3.5rem;
+      display: flex; flex-direction: column; gap: .5rem;
+    }
+    .coach-row { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+    .coach-title { font-weight: 900; letter-spacing: .2px; }
+    .coach-text { margin: 0; }
+
+    .mcq {
+      border-top: 1px dashed rgba(125,125,125,.4);
+      padding-top: .6rem;
+      display: grid; gap: .45rem;
+    }
+    .mcq h3 { margin: 0; font-size: .98rem; color: var(--ink); }
+    .mcq .choices { display: grid; gap: .35rem; }
+    .mcq button.choice {
+      text-align: left;
+      background: rgba(125,125,125,.06);
+      border: 1px solid var(--border);
+      padding: .45rem .6rem;
+      font-weight: 700;
+      border-radius: 8px;
+    }
+    .mcq button.choice:hover:not(:disabled) { transform: translateY(-1px); }
+    .mcq .feedback { font-weight: 900; }
+    .mcq .feedback.good { color: var(--good); }
+    .mcq .feedback.bad { color: var(--hilite); }
+
+    .guiding { background: var(--row-hover); border: 1px solid var(--border); border-radius: 8px; padding: .75rem .9rem; margin-bottom: 1rem; }
+    .guiding h2 { margin: .2rem 0 .4rem; font-size: 1.05rem; }
+
+    .tchart-wrap { overflow: visible; }
+    .tchart { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .tchart td, .tchart th { overflow-wrap: anywhere; word-break: normal; }
+    .tchart thead th {
+      text-align: left; font-weight: 900; color: var(--accent);
+      border-bottom: 2px solid var(--border); padding: .5rem .6rem; background: var(--bg);
+      position: sticky; top: 0; z-index: 1;
+    }
+    .tchart tbody td { border-bottom: 1px solid var(--border); padding: .8rem .6rem; vertical-align: top; }
+    .tchart tbody tr {
+      cursor: pointer;
+      transition: transform .2s cubic-bezier(.4,0,.2,1), background .2s ease, box-shadow .2s ease;
+      border-radius: 6px;
+    }
+    .tchart tbody tr:hover { background: var(--row-hover); transform: translateX(6px); box-shadow: -4px 0 0 var(--accent-2); }
+    .tchart tbody tr.active { background: var(--row-active); outline: 2px solid var(--accent); transform: translateX(8px); box-shadow: -6px 0 0 var(--focus); }
+    .tchart .col-statement { width: 65%; }
+    .tchart .col-reason { width: 35%; text-align: center; }
+
+    .badge {
+      display: inline-block; padding: .3rem .6rem; border-radius: .4rem; font-size: .9rem;
+      border: 1px solid var(--border); color: #374151; background: #f8fafc; font-weight: 900;
+    }
+    body.dark .badge { filter: brightness(0.85); }
+    .badge.given { color: #0b6b1a; background: #e7f6ea; border-color: #c4e7cb; }
+    .badge.det { color: #5b21b6; background: #f3e8ff; border-color: #e9d5ff; }
+    .badge.constr { color: #7a1a0b; background: #fff4ed; border-color: #fde3d3; }
+    .badge.prop { color: #0b3b6b; background: #e9f2ff; border-color: #d7e7ff; }
+    .badge.def { color: #0f766e; background: #ecfdf5; border-color: #bbf7d0; }
+    .badge.thus { color: #065f46; background: #ecfdf5; border-color: #d1fae5; }
+
+    .has-tooltip { position: relative; cursor: help; text-decoration: underline dotted var(--muted); }
+    .has-tooltip::after {
+      content: attr(data-tooltip);
+      position: absolute; bottom: 130%; right: -10px; left: auto;
+      background: var(--ink); color: var(--bg);
+      padding: 0.75rem 1rem; border-radius: 6px;
+      font-size: 0.95rem; font-weight: 600; white-space: normal;
+      width: max-content; max-width: 320px;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s, bottom 0.2s;
+      z-index: 10; box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      text-align: left; line-height: 1.5;
+    }
+    .has-tooltip:hover::after,
+    .has-tooltip:focus::after { opacity: 1; bottom: 150%; }
+    .has-tooltip:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    .geom-ref { font-weight: 900; cursor: pointer; color: var(--accent); transition: color 0.2s, background 0.2s; border-radius: 3px; padding: 0 2px; }
+    .geom-ref:hover { color: var(--hilite); background: rgba(239, 68, 68, 0.15); }
+
+    .practice-select {
+      width: 100%; max-width: 100%; padding: 0.4rem; margin-bottom: 0.4rem; border-radius: 4px;
+      border: 2px solid var(--accent); background: var(--board-bg); color: var(--ink);
+      font-weight: 900; cursor: pointer;
+      white-space: normal; height: auto; word-break: break-word;
+    }
+    .blur-hidden { filter: blur(5px); opacity: 0.5; pointer-events: none; user-select: none; transition: filter 0.3s; }
+
+    .hidden { opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; }
+    .fade-in { animation: fade .25s ease-out forwards; }
+    @keyframes fade { from{opacity:0} to{opacity:1} }
+    .draw-solid { stroke-dasharray: 2000; stroke-dashoffset: 2000; animation: drawLine .9s ease-in-out forwards; }
+    @keyframes drawLine { to{stroke-dashoffset:0} }
+
+    .tick { stroke-linecap: round; }
+    @keyframes flashHighlight { 0%{filter:drop-shadow(0 0 12px var(--focus))} 100%{filter:drop-shadow(0 0 2px rgba(0,0,0,.3))} }
+
+    :is(line, path, polygon, circle, rect).highlight {
+      animation: flashHighlight .45s ease-out;
+      filter: drop-shadow(0 0 2px rgba(0,0,0,.3));
+    }
+    :is(line, path, polygon, circle, rect).hl-strong { stroke: var(--accent-2)!important; stroke-width: 5!important; }
+    :is(line, path, polygon, circle, rect).hl-parallelogram { stroke: var(--accent-2)!important; stroke-width: 4!important; fill: rgba(217,119,6,.08)!important; }
+    :is(line, path, polygon, circle, rect).hl-tri { stroke: var(--good)!important; stroke-width: 4!important; fill: rgba(22,163,74,.10)!important; }
+
+    /* Group highlight support */
+    g.hl-strong :is(line, path, polygon, circle, rect) { stroke: var(--accent-2)!important; stroke-width: 5!important; }
+    g.hl-parallelogram :is(line, path, polygon, circle, rect) { stroke: var(--accent-2)!important; stroke-width: 4!important; fill: rgba(217,119,6,.08)!important; }
+    g.hl-tri :is(line, path, polygon, circle, rect) { stroke: var(--good)!important; stroke-width: 4!important; fill: rgba(22,163,74,.10)!important; }
+
+    text.hl-strong, text.hl-parallelogram { fill: var(--accent-2)!important; stroke: none!important; }
+    text.hl-tri { fill: var(--good)!important; stroke: none!important; }
+    text.highlight { filter: none !important; }
+
+    .hover-hl { stroke: var(--hilite) !important; stroke-width: 5 !important; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)) !important; fill: rgba(239, 68, 68, 0.15) !important; transition: all 0.2s; }
+    text.hover-hl { fill: var(--hilite) !important; stroke: none !important; filter: none !important; }
+    g.hover-hl :is(line, path, polygon, circle, rect) { stroke: var(--hilite) !important; stroke-width: 5 !important; filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.8)) !important; fill: rgba(239, 68, 68, 0.15) !important; }
+    g.hover-hl text { fill: var(--hilite) !important; stroke: none !important; filter: none !important; }
+
+    svg :is(line, path, polygon, circle, rect, text) { transition: opacity .25s ease; }
+    svg.focusless :is(line, path, polygon, circle, rect, text) { opacity: .12; }
+    svg.focusless #labels text { opacity: 1 !important; }
+    svg.focusless :is(line, path, polygon, circle, rect, text).highlight,
+    svg.focusless :is(line, path, polygon, circle, rect, text).hover-hl { opacity: 1 !important; }
+    svg.focusless :is(g.highlight, g.hover-hl) :is(line, path, polygon, circle, rect, text) { opacity: 1 !important; }
+    svg.focusless .focus-keep { opacity: .35 !important; }
+    svg.focusless g.focus-keep :is(line, path, polygon, circle, rect, text) { opacity: .35 !important; }
+
+    [tabindex="0"]:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+    .sr-only {
+      position: absolute !important; width: 1px !important; height: 1px !important; padding: 0 !important;
+      margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap !important; border: 0 !important;
+    }
+
+    .handle { fill: rgba(124,58,237,.22); stroke: rgba(124,58,237,.8); stroke-width: 2; cursor: grab; }
+    .handle:active { cursor: grabbing; }
+    .handle-ring { fill: none; stroke: rgba(124,58,237,.35); stroke-width: 6; }
+
+    .modal {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      display: flex; align-items: center; justify-content: center;
+      padding: 1rem;
+      z-index: 9999;
+    }
+    .modal.hidden { display: none !important; }
+
+    .modal-card {
+      width: min(720px, 92vw);
+      background: var(--board-bg);
+      color: var(--ink);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 18px 55px rgba(0,0,0,.35);
+      padding: 1rem 1.1rem;
+    }
+    .modal-head { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+    .modal-head h2 { margin:0; font-size:1.2rem; }
+    .modal-body { margin-top:.75rem; line-height:1.5; }
+    .modal-body ul { margin:.6rem 0 0 1.2rem; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none!important; transition: none!important; scroll-behavior: auto!important; } }
+    @media print { .controls, .guiding, .progress-container { display: none; } }
+  </style>
+</head>
+
+<body>
+<header class="header">
+  <h1 id="page-title">Euclid Interactive Proof</h1>
+  <p class="subtitle" id="page-subtitle">Loading…</p>
+</header>
+
+<main class="layout">
+  <section class="board" aria-label="Interactive diagram">
+    <div class="controls">
+      <button type="button" id="btn-prev" aria-label="Previous line">◀ Back</button>
+      <button type="button" id="btn-next" class="primary" aria-label="Next line">Next ▶</button>
+      <button type="button" id="btn-play" aria-label="Auto play" aria-pressed="false">▶ Play</button>
+      <button type="button" id="btn-reset" aria-label="Reset (restart activity)">Reset</button>
+      <button type="button" id="btn-focus" aria-label="Enable focus mode" aria-pressed="false">☼ Focus</button>
+      <button type="button" id="btn-explore" aria-label="Enable explore mode" aria-pressed="false">Explore</button>
+      <button type="button" id="btn-dark" aria-label="Enable dark mode" aria-pressed="false">
+        <span aria-hidden="true">🌙</span> Dark
+      </button>
+      <button type="button" id="btn-help" aria-label="Open tutorial">Tutorial</button>
+
+      <select id="mode-select" aria-label="Select study or practice mode">
+        <option value="0">Study Mode</option>
+        <option value="1">Practice: Easy (Reasons)</option>
+        <option value="2">Practice: Med (Statements)</option>
+        <option value="3">Practice: Hard (Both)</option>
+      </select>
+
+      <span id="step-counter" class="muted push-right" aria-live="polite"></span>
+    </div>
+
+    <div class="progress-container" id="progress-container"
+         tabindex="0"
+         role="slider"
+         aria-label="Progress through proof steps"
+         aria-valuemin="1"
+         aria-valuemax="1"
+         aria-valuenow="1"
+         aria-valuetext="Step 1 of 1">
+      <div id="progress-bar" class="progress-bar"></div>
+    </div>
+
+    <div class="legend">
+      Tip: Hover over bold text like <span class="geom-ref">ABC</span> to highlight the diagram.
+    </div>
+    <div id="layout-hint" class="muted" aria-live="polite"></div>
+
+    <div class="svg-wrapper">
+      <div id="diagram-mount" aria-label="Diagram mount (SVG loads here)"></div>
+      <div id="qed-stamp" class="qed-stamp hidden" aria-hidden="true">Q.E.D.</div>
+    </div>
+
+    <div id="coach" class="coach-box">
+      <div class="coach-row">
+        <div class="coach-title">Teacher’s note</div>
+        <div class="muted" id="coach-stepkind"></div>
+      </div>
+      <p class="coach-text" id="coach-text">Select a step in the proof to see notes here.</p>
+      <div id="mcq" class="mcq hidden" aria-hidden="true"></div>
+    </div>
+
+    <div id="live" class="sr-only" aria-live="polite"></div>
+  </section>
+
+  <section class="steps" aria-label="Statement–Reason proof">
+    <aside class="guiding">
+      <h2>Guiding Question</h2>
+      <p id="guiding-question">Loading…</p>
+      <details style="cursor:pointer;margin-top:.5rem;">
+        <summary style="font-weight:bold;color:var(--accent);">Need a hint?</summary>
+        <ul style="margin-top:.5rem;line-height:1.5;" id="guiding-hints"></ul>
+      </details>
+    </aside>
+
+    <div class="tchart-wrap" id="tchart-wrap">
+      <table class="tchart" aria-label="Statement–Reason table">
+        <thead>
+          <tr>
+            <th class="col-statement">Statement</th>
+            <th class="col-reason">Reason</th>
+          </tr>
+        </thead>
+        <tbody id="proof-body"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<div id="tutorial-modal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="tutorial-title">
+  <div class="modal-card" role="document">
+    <div class="modal-head">
+      <h2 id="tutorial-title">How to use this page</h2>
+      <button type="button" id="btn-help-close" class="primary" aria-label="Close tutorial">Close</button>
+    </div>
+
+    <div class="modal-body">
+      <p class="muted" style="margin-top:0;">
+        This is an interactive statement–reason proof with a linked diagram.
+      </p>
+
+      <ul>
+        <li><strong>Next / Back</strong>: step through the proof and watch highlights update.</li>
+        <li><strong>Hover bold geometry</strong> (e.g., ABC, BC): highlights the matching diagram parts.</li>
+        <li><strong>Progress bar</strong>: click to jump. Keyboard: focus bar then ←/→.</li>
+        <li><strong>Focus</strong>: dims everything except the relevant objects.</li>
+        <li><strong>Explore</strong>: drag handles to see the construction change.</li>
+        <li><strong>Practice modes</strong>: choose statements/reasons to unlock steps.</li>
+        <li><strong>Keyboard</strong>: ←/→ step, Space play/pause, R reset.</li>
+      </ul>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:1rem 0;">
+
+      <p class="muted" style="margin:0;">
+        Tip: For <strong>side-by-side</strong> (two columns), widen the window or zoom out.
+        For <strong>stacked</strong> (one column), narrow the window or zoom in.
+      </p>
+
+      <label style="display:flex;gap:.5rem;align-items:center;margin-top:1rem;font-weight:800;">
+        <input type="checkbox" id="tutorial-dontshow">
+        Don’t show this automatically again
+      </label>
+    </div>
+  </div>
+</div>
+
+<script defer src="engine.js"></script>
+</body>
+</html>
