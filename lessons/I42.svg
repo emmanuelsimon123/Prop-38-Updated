@@ -6,78 +6,79 @@
     with angle CEF equal to D.
   </desc>
 
-  <!-- Given angle D (separate) -->
+  <!-- Given angle D (separate, right side) -->
   <g id="angleD_parts">
-    <circle cx="650" cy="340" r="2" fill="var(--svg-ink)"/>
-    <line id="rayD1" x1="650" y1="340" x2="740" y2="340" stroke="var(--svg-ink)" stroke-width="2"/>
-    <line id="rayD2" x1="650" y1="340" x2="715" y2="248" stroke="var(--svg-ink)" stroke-width="2"/>
+    <circle cx="650" cy="340" r="2.2" fill="var(--svg-ink)"/>
+    <line id="rayD1" x1="650" y1="340" x2="745" y2="340" stroke="var(--svg-ink)" stroke-width="2"/>
+    <line id="rayD2" x1="650" y1="340" x2="715" y2="250" stroke="var(--svg-ink)" stroke-width="2"/>
   </g>
 
   <!-- Triangle ABC -->
   <g id="triABC_parts">
-    <!-- Base BC split into BE and EC so we can reference the midpoint -->
+    <!-- Base is split so we can refer to BE and EC; the group id="BC" is used for base BC -->
     <g id="BC">
       <line id="BE" x1="150" y1="380" x2="260" y2="380" stroke="var(--svg-ink)" stroke-width="2"/>
       <line id="EC" x1="260" y1="380" x2="370" y2="380" stroke="var(--svg-ink)" stroke-width="2"/>
     </g>
 
-    <line id="AB" x1="240" y1="140" x2="150" y2="380" stroke="var(--svg-ink)" stroke-width="2"/>
-    <line id="AC" class="hidden no-draw" aria-hidden="true"
-          x1="240" y1="140" x2="370" y2="380" stroke="#64748b" stroke-width="2.6" stroke-dasharray="6 6"/>
-    <line id="AC_side" x1="240" y1="140" x2="370" y2="380" stroke="var(--svg-ink)" stroke-width="2"/>
+    <!-- A starts at (240,170). When Explore moves A, engine updates x1/y1 of AB and AC -->
+    <line id="AB" x1="240" y1="170" x2="150" y2="380" stroke="var(--svg-ink)" stroke-width="2"/>
+    <line id="AC" x1="240" y1="170" x2="370" y2="380" stroke="var(--svg-ink)" stroke-width="2"/>
   </g>
 
-  <!-- Midpoint E (revealed) -->
+  <!-- Midpoint E (hidden until revealed) -->
   <circle id="ptE" class="hidden" aria-hidden="true" cx="260" cy="380" r="3.2" fill="var(--svg-ink)"/>
 
+  <!-- Equal marks for BE and EC -->
   <line id="tickBE" class="tick hidden" aria-hidden="true"
         x1="235" y1="374" x2="235" y2="386" stroke="var(--svg-ink)" stroke-width="2"/>
   <line id="tickEC" class="tick hidden" aria-hidden="true"
         x1="285" y1="374" x2="285" y2="386" stroke="var(--svg-ink)" stroke-width="2"/>
 
-  <!-- Construction lines (revealed as steps advance) -->
+  <!-- AE (hidden until revealed) -->
   <line id="AE" class="hidden no-draw" aria-hidden="true"
-        x1="240" y1="140" x2="260" y2="380" stroke="#6b7280" stroke-width="2"/>
+        x1="240" y1="170" x2="260" y2="380" stroke="#6b7280" stroke-width="2"/>
 
-  <!-- EF is the copied-angle ray from E -->
+  <!-- EF ray (hidden). Endpoint (x2,y2) will be updated to F by Explore. -->
   <line id="EF" class="hidden no-draw" aria-hidden="true"
-        x1="260" y1="380" x2="430" y2="140" stroke="#6b7280" stroke-width="2"/>
+        x1="260" y1="380" x2="409" y2="170" stroke="#6b7280" stroke-width="2"/>
 
-  <!-- AG is horizontal through A (parallel EC) -->
+  <!-- AG horizontal through A (hidden). y will be updated by Explore. -->
   <line id="AG" class="hidden no-draw" aria-hidden="true"
-        x1="60" y1="140" x2="780" y2="140" stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="6 8"/>
+        x1="60" y1="170" x2="780" y2="170" stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="6 8"/>
 
-  <!-- CG through C parallel EF -->
+  <!-- CG through C parallel EF (hidden). Endpoint updated by Explore. -->
   <line id="CG" class="hidden no-draw" aria-hidden="true"
-        x1="370" y1="380" x2="540" y2="140" stroke="#6b7280" stroke-width="2"/>
+        x1="370" y1="380" x2="519" y2="170" stroke="#6b7280" stroke-width="2"/>
 
-  <!-- FG top side -->
+  <!-- FG top side (hidden). Endpoints updated by Explore. -->
   <line id="FG" class="hidden no-draw" aria-hidden="true"
-        x1="430" y1="140" x2="540" y2="140" stroke="var(--svg-ink)" stroke-width="2"/>
+        x1="409" y1="170" x2="519" y2="170" stroke="var(--svg-ink)" stroke-width="2"/>
 
-  <!-- Parallelogram polygon (revealed) -->
+  <!-- Parallelogram polygon (hidden) -->
   <polygon id="paraFECG" class="hidden" aria-hidden="true"
-           points="430,140 260,380 370,380 540,140"
+           points="409,170 260,380 370,380 519,170"
            fill="none" stroke="var(--svg-ink)" stroke-width="2"/>
 
-  <!-- Points F and G (revealed) -->
-  <circle id="ptF" class="hidden" aria-hidden="true" cx="430" cy="140" r="3.2" fill="var(--svg-ink)"/>
-  <circle id="ptG" class="hidden" aria-hidden="true" cx="540" cy="140" r="3.2" fill="var(--svg-ink)"/>
+  <!-- Points F and G (hidden until revealed) -->
+  <circle id="ptF" class="hidden" aria-hidden="true" cx="409" cy="170" r="3.2" fill="var(--svg-ink)"/>
+  <circle id="ptG" class="hidden" aria-hidden="true" cx="519" cy="170" r="3.2" fill="var(--svg-ink)"/>
 
   <!-- Explore handle for A -->
   <g id="explore-handles" class="hidden" aria-hidden="true">
-    <circle id="handleA_ring" class="handle-ring" cx="240" cy="140" r="14"></circle>
-    <circle id="handleA" class="handle" cx="240" cy="140" r="8" tabindex="0" aria-label="Drag point A"></circle>
+    <circle id="handleA_ring" class="handle-ring" cx="240" cy="170" r="14"></circle>
+    <circle id="handleA" class="handle" cx="240" cy="170" r="8" tabindex="0" aria-label="Drag point A"></circle>
   </g>
 
   <!-- Labels -->
   <g id="labels" font-size="18" font-weight="bold" fill="var(--svg-ink)">
-    <text id="lblA" x="228" y="128">A</text>
+    <text id="lblA" x="228" y="158">A</text>
     <text id="lblB" x="140" y="405">B</text>
     <text id="lblC" x="362" y="405">C</text>
+
     <text id="lblE" class="hidden" aria-hidden="true" x="268" y="405">E</text>
-    <text id="lblF" class="hidden" aria-hidden="true" x="438" y="130">F</text>
-    <text id="lblG" class="hidden" aria-hidden="true" x="548" y="130">G</text>
+    <text id="lblF" class="hidden" aria-hidden="true" x="417" y="160">F</text>
+    <text id="lblG" class="hidden" aria-hidden="true" x="527" y="160">G</text>
 
     <text id="lblD" x="642" y="366">D</text>
   </g>
