@@ -52,6 +52,17 @@ function shuffle(arr, rand = Math.random) {
 }
 function uniq(arr) { return [...new Set(arr)]; }
 
+function randomU32() {
+  try {
+    const a = new Uint32Array(1);
+    crypto.getRandomValues(a);
+    return a[0] >>> 0;
+  } catch (e) {
+    // fallback
+    return ((Date.now() ^ (Math.random() * 0xFFFFFFFF)) >>> 0);
+  }
+}
+
 const STOPWORDS = new Set([
   'the','a','an','and','or','to','of','in','on','are','is','be','that','then','therefore','moreover',
   'through','both','directions','equal','equals','triangle','triangles','parallelogram','parallelograms'
@@ -201,9 +212,10 @@ const Diagram = (() => {
   function addClass(id, ...klasses) { get(id)?.classList.add(...klasses); }
   function removeClass(id, ...klasses) { get(id)?.classList.remove(...klasses); }
 
+  // Keep removal available (in case old hatches exist in the DOM)
   function removeTriangleHatch(name) { document.getElementById(`tri${name}fill`)?.remove(); }
 
-  // Hatching disabled (no-op)
+  // ✅ HATCHING DISABLED: do nothing (no green shading)
   function addTriangleHatch(name) { return; }
 
   function clearHighlights() {
@@ -211,6 +223,7 @@ const Diagram = (() => {
     svg?.querySelectorAll('.highlight, .hl-strong, .hl-parallelogram, .hl-tri, .hover-hl')
       .forEach(el => el.classList.remove('highlight','hl-strong','hl-parallelogram','hl-tri','hover-hl'));
 
+    // Always remove any hatch polygons that might exist from older runs
     document.querySelectorAll('polygon[id^="tri"][id$="fill"]').forEach(el => el.remove());
 
     const stamp = document.getElementById('qed-stamp');
@@ -230,15 +243,15 @@ const Diagram = (() => {
 
 /* =========================================================
    Explore Mode (generic; per-lesson update function)
-   SCROLL FIX: do NOT install global pointermove with preventDefault.
-   Only track pointermove while dragging, and do not prevent default.
+   (scroll-safe: only pointermove during drag, no preventDefault)
 ========================================================= */
 const Explore = (() => {
   let enabled = false;
   let dragKey = null;
   let dragPointerId = null;
   let draggingEl = null;
-  let P = {}; // points
+
+  let P = {}; // {A:{x,y}, D:{x,y}, ...}
 
   function initFromLesson() {
     P = {};
@@ -266,9 +279,9 @@ const Explore = (() => {
 
   function pointerToSvgPoint(evt) {
     const svg = Diagram.get('diagram');
-    if (!svg) return {x:0,y:0};
+    if (!svg) return { x: 0, y: 0 };
     const ctm = svg.getScreenCTM();
-    if (!ctm) return {x:0,y:0};
+    if (!ctm) return { x: 0, y: 0 };
     const pt = svg.createSVGPoint();
     pt.x = evt.clientX; pt.y = evt.clientY;
     const sp = pt.matrixTransform(ctm.inverse());
@@ -278,7 +291,7 @@ const Explore = (() => {
   function onMove(evt) {
     if (!enabled || !dragKey) return;
 
-    const {x,y} = pointerToSvgPoint(evt);
+    const { x, y } = pointerToSvgPoint(evt);
     const h = LESSON.explore.handles[dragKey];
 
     const clampX = h.clampX || [-Infinity, Infinity];
@@ -470,6 +483,9 @@ const Proof = (() => {
   let focusMode = false;
   let practiceLevel = 0;
 
+  // --- MCQ shuffle seed (CHANGED): updates on reset so MCQ answer order changes each time
+  let mcqRunSeed = randomU32();
+
   let solvedStatements = new Set([0]);
   let solvedReasons = new Set([0]);
   let solvedMCQ = new Set();
@@ -578,7 +594,10 @@ const Proof = (() => {
     const alreadySolved = solvedMCQ.has(stepIndex);
     const feedbackId = `mcq-feedback-${stepIndex}`;
 
-    const r = mulberry32(0xC0FFEE + stepIndex * 9973);
+    // CHANGED: include mcqRunSeed so shuffling changes after each Reset
+    const seed = ((0xC0FFEE ^ mcqRunSeed) + stepIndex * 9973) >>> 0;
+    const r = mulberry32(seed);
+
     const items = mcq.choices.map((text, originalIndex) => ({ text, originalIndex }));
     const shuffled = shuffle(items, r);
     const newCorrectIndex = shuffled.findIndex(it => it.originalIndex === mcq.correctIndex);
@@ -707,6 +726,9 @@ const Proof = (() => {
 
     current = -1;
     stop();
+
+    // CHANGED: new MCQ shuffle seed each reset
+    mcqRunSeed = randomU32();
 
     solvedStatements = new Set([0]);
     solvedReasons = new Set([0]);
@@ -979,7 +1001,7 @@ const Proof = (() => {
 
       if (e.key === 'Home') setActive(0, { scroll: true, setHash: true });
       if (e.key === 'End') {
-        if (practiceLevel === 0)        if (practiceLevel === 0) setActive(LESSON.steps.length - 1, { scroll: true, setHash: true });
+        if (practiceLevel === 0) setActive(LESSON.steps.length - 1, { scroll: true, setHash: true });
         else setActive(maxAllowedStep(), { scroll: true, setHash: true });
       }
     });
