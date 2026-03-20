@@ -39,28 +39,22 @@ window.LESSON = {
       try {
         const EPS = 0.001;
 
-        // Fixed base points
         const B = { x: 200, y: 360 };
         const C = { x: 360, y: 360 };
         const E = { x: 520, y: 360 };
 
-        // Copy points so we can enforce a stable construction for F
         let A = { ...P.A };
         let D = { ...P.D };
 
-        // Ensure A is above D, so AF meets DE produced (beyond D)
+        // Keep A above D so AF meets DE produced (beyond D)
         if (A.y >= D.y - 20) A.y = D.y - 20;
 
-        // Prevent DE from becoming horizontal (not likely with clamps, but safe)
+        // Prevent DE horizontal degeneracy
         if (Math.abs(E.y - D.y) < EPS) D.y = E.y - 20;
 
-        // F is intersection of DE (produced) with horizontal through A (AF)
-        // Parametrize line through D->E: D + u(E-D). Solve y = A.y.
-        const u = (A.y - D.y) / (E.y - D.y); // should be negative (produced beyond D)
-        const F = {
-          x: D.x + u * (E.x - D.x),
-          y: A.y
-        };
+        // F = intersection of DE (produced) with horizontal through A (AF)
+        const u = (A.y - D.y) / (E.y - D.y);
+        const F = { x: D.x + u * (E.x - D.x), y: A.y };
 
         // Update triangle ABC
         Diagram.get("AB")?.setAttribute("x1", A.x);
@@ -80,7 +74,7 @@ window.LESSON = {
         Diagram.get("AD")?.setAttribute("x2", D.x);
         Diagram.get("AD")?.setAttribute("y2", D.y);
 
-        // AF (full width)
+        // AF full width
         const AF = Diagram.get("AF");
         if (AF) {
           AF.setAttribute("x1", 0);
@@ -95,7 +89,7 @@ window.LESSON = {
         Diagram.get("DF")?.setAttribute("x2", F.x);
         Diagram.get("DF")?.setAttribute("y2", F.y);
 
-        // FE and FC (triangle FCE)
+        // FE and FC
         Diagram.get("FE")?.setAttribute("x1", F.x);
         Diagram.get("FE")?.setAttribute("y1", F.y);
         Diagram.get("FE")?.setAttribute("x2", E.x);
@@ -106,7 +100,7 @@ window.LESSON = {
         Diagram.get("FC")?.setAttribute("x2", C.x);
         Diagram.get("FC")?.setAttribute("y2", C.y);
 
-        // Handles (in case we adjusted A.y)
+        // Sync handles (if we adjusted A)
         Diagram.get("handleA")?.setAttribute("cx", A.x);
         Diagram.get("handleA")?.setAttribute("cy", A.y);
         Diagram.get("handleA_ring")?.setAttribute("cx", A.x);
@@ -120,7 +114,6 @@ window.LESSON = {
         // Labels
         Diagram.get("lblA")?.setAttribute("x", A.x - 6);
         Diagram.get("lblA")?.setAttribute("y", A.y - 10);
-
         Diagram.get("lblD")?.setAttribute("x", D.x - 6);
         Diagram.get("lblD")?.setAttribute("y", D.y - 10);
 
@@ -136,7 +129,7 @@ window.LESSON = {
 
   steps: [
     {
-      kind: "given",
+      kind: "constr",
       statementParts: [
         { t: "Exposition. Let " },
         { t: "ABC", ref: ["triABC", "lblA", "lblB", "lblC"] },
@@ -150,7 +143,7 @@ window.LESSON = {
         { t: "BE", ref: ["BE", "lblB", "lblE"] },
         { t: "." }
       ],
-      reason: { label: "Given", kind: "given" },
+      reason: { label: "Exposition", kind: "constr", tooltip: "We set out the given configuration." },
       coach: "We are given two equal-area triangles on equal bases BC and CE, on the same side of the line BE.",
       announce: ["triangles ABC and DCE", "bases BC and CE", "line BE"],
       highlight: [
@@ -196,12 +189,14 @@ window.LESSON = {
         { t: "F", ref: ["ptF", "lblF"] },
         { t: ", and join " },
         { t: "FE", ref: ["FE", "lblF", "lblE"] },
-        { t: "." }
+        { t: " (and " },
+        { t: "FC", ref: ["FC", "lblF", "lblC"] },
+        { t: ")." }
       ],
       reason: { label: "I.Post.1 + I.31", kind: "constr", tooltip: "Join two points; draw a parallel through a point." },
       reveal: ["AD", "AF", "DF", "ptF", "lblF", "FE", "FC"],
-      coach: "Assume AD is not parallel to BE. Draw AF through A parallel to BE, meeting DE produced at F; then join FE (and FC so triangle FCE is visible).",
-      announce: ["AD", "AF", "F", "FE"],
+      coach: "Assume AD is not parallel to BE. Draw AF through A parallel to BE, meeting DE produced at F; then join FE and FC to display triangle FCE.",
+      announce: ["AD", "AF", "F", "FE", "FC"],
       highlight: [
         { id: "AD", mode: "strong" },
         { id: "AF", mode: "strong" },
@@ -211,7 +206,21 @@ window.LESSON = {
         { id: "FE", mode: "strong" },
         { id: "FC", mode: "strong" }
       ],
-      focusKeep: ["BE"]
+      focusKeep: ["BE"],
+      mcq: {
+        question: "Why do we draw the line AF through A parallel to BE?",
+        choices: [
+          "So we can apply I.38: triangles on equal bases and between the same parallels are equal in area.",
+          "To prove BC is equal to CE by construction.",
+          "To make triangles ABC and DCE congruent."
+        ],
+        correctIndex: 0,
+        feedback: [
+          "Correct: AF creates the ‘same parallels’ condition with BE.",
+          "No—BC = CE is given, not constructed here.",
+          "No—this proposition is about parallels and area, not congruence."
+        ]
+      }
     },
 
     {
@@ -242,7 +251,21 @@ window.LESSON = {
         { id: "AB", mode: "tri" }, { id: "AC", mode: "tri" },
         { id: "FC", mode: "tri" }, { id: "FE", mode: "tri" }
       ],
-      focusKeep: ["BE"]
+      focusKeep: ["BE"],
+      mcq: {
+        question: "Which condition is essential for using Proposition I.38 here?",
+        choices: [
+          "The triangles must be right triangles.",
+          "Their bases are equal and they lie between the same parallels.",
+          "The triangles share the same base."
+        ],
+        correctIndex: 1,
+        feedback: [
+          "No—right angles are not required in I.38.",
+          "Correct: equal bases + same parallels is exactly I.38.",
+          "No—that would be I.37, not I.38."
+        ]
+      }
     },
 
     {
