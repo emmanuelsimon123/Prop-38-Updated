@@ -81,7 +81,14 @@
     #layout-hint { margin: 0 0 .6rem; font-size: .9rem; font-weight: 800; }
 
     .svg-wrapper { position: relative; width: 100%; flex-grow: 1; }
-    .svg-wrapper, #diagram, #explore-handles, .handle { touch-action: none; }
+
+    /* ========= SCROLL FIX =========
+       Don't disable scrolling gestures on the whole diagram area.
+       Only disable touch actions on the draggable handles themselves. */
+    .svg-wrapper, #diagram, #explore-handles { touch-action: pan-y; }
+    .handle { touch-action: none; }
+    /* ============================== */
+
     svg { width: 100%; height: auto; border-radius: 6px; background: var(--board-bg); display: block; }
 
     .qed-stamp {
@@ -126,7 +133,7 @@
     .mcq .feedback.bad { color: var(--hilite); }
 
     .guiding { background: var(--row-hover); border: 1px solid var(--border); border-radius: 8px; padding: .75rem .9rem; margin-bottom: 1rem; }
-    .guiding h2 { margin: .2rem 0 .4rem; font-size: 1.05rem; }
+    .guiding h2 { margin: .2rem 0 .4rem; font-size: .05rem; }
 
     .tchart-wrap { overflow: visible; }
     .tchart { width: 100%; border-collapse: collapse; table-layout: fixed; }
