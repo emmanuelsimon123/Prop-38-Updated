@@ -25,11 +25,8 @@
 
     * { box-sizing: border-box; }
 
-    /* SCROLL FIX:
-       overscroll-behavior: none can make scrolling feel "dead" in some setups.
-       Use auto so wheel/trackpad scrolling behaves normally. */
+    /* keep scroll working normally */
     html, body { overflow-x: hidden; overscroll-behavior: auto; }
-
     body {
       font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif;
       margin: 0; background: var(--bg); color: var(--ink);
@@ -62,7 +59,6 @@
     .muted { color: var(--muted); }
     .push-right { margin-left: auto; font-weight: 700; }
 
-    /* Progress bar (no thumb), keyboard accessible */
     .progress-container {
       width: 100%;
       height: 12px;
@@ -87,9 +83,7 @@
 
     .svg-wrapper { position: relative; width: 100%; flex-grow: 1; }
 
-    /* SCROLL FIX:
-       Previously, touch-action:none on the whole SVG region can break scrolling behavior.
-       Allow normal scrolling everywhere; only handles can block touch actions. */
+    /* scroll fix: do not disable touch actions for entire svg region */
     .svg-wrapper, #diagram, #explore-handles { touch-action: auto; }
     .handle { touch-action: none; }
 
@@ -104,7 +98,10 @@
       text-shadow: 2px 2px 0 rgba(255,255,255,.5);
     }
     .stamp-drop { animation: stampDrop .6s cubic-bezier(.175,.885,.32,1.275) forwards; }
-    @keyframes stampDrop { 0%{transform:translate(-50%,-50%) scale(3) rotate(-25deg);opacity:0} 100%{transform:translate(-50%,-50%) scale(1) rotate(-10deg);opacity:1} }
+    @keyframes stampDrop {
+      0% { transform:translate(-50%,-50%) scale(3) rotate(-25deg); opacity:0 }
+      100% { transform:translate(-50%,-50%) scale(1) rotate(-10deg); opacity:1 }
+    }
 
     .coach-box {
       margin-top: 0.5rem; padding: 0.85rem 1rem; background: rgba(59, 130, 246, 0.1);
@@ -170,11 +167,9 @@
     .badge.def { color: #0f766e; background: #ecfdf5; border-color: #bbf7d0; }
     .badge.thus { color: #065f46; background: #ecfdf5; border-color: #d1fae5; }
 
-    /* Keep "tooltip hint" styling, but NO pseudo-tooltip box. */
     .has-tooltip { cursor: help; text-decoration: underline dotted var(--muted); }
     .has-tooltip:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-    /* Floating tooltip element (created by engine.js) */
     #floating-tooltip {
       position: fixed;
       z-index: 999999;
@@ -219,7 +214,6 @@
     :is(line, path, polygon, circle, rect).hl-parallelogram { stroke: var(--accent-2)!important; stroke-width: 4!important; fill: rgba(217,119,6,.08)!important; }
     :is(line, path, polygon, circle, rect).hl-tri { stroke: var(--good)!important; stroke-width: 4!important; fill: rgba(22,163,74,.10)!important; }
 
-    /* Group highlight support */
     g.hl-strong :is(line, path, polygon, circle, rect) { stroke: var(--accent-2)!important; stroke-width: 5!important; }
     g.hl-parallelogram :is(line, path, polygon, circle, rect) { stroke: var(--accent-2)!important; stroke-width: 4!important; fill: rgba(217,119,6,.08)!important; }
     g.hl-tri :is(line, path, polygon, circle, rect) { stroke: var(--good)!important; stroke-width: 4!important; fill: rgba(22,163,74,.10)!important; }
@@ -352,6 +346,9 @@
         <ul style="margin-top:.5rem;line-height:1.5;" id="guiding-hints"></ul>
       </details>
     </aside>
+
+    <!-- NEW: Summary box (engine.js fills this if LESSON.summaryHTML exists) -->
+    <aside id="summary-box" class="guiding hidden" aria-hidden="true"></aside>
 
     <div class="tchart-wrap" id="tchart-wrap">
       <table class="tchart" aria-label="Statement–Reason table">
