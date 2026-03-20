@@ -1,0 +1,56 @@
+<svg id="diagram" viewBox="0 0 840 520" role="img" aria-labelledby="diagramTitle diagramDesc"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="diagramTitle">Diagram for Proposition I.41</title>
+  <desc id="diagramDesc">
+    Parallelogram ABCD and triangle EBC share base BC and lie between parallels BC and AE.
+  </desc>
+
+  <!-- Parallels -->
+  <line id="lineAE" x1="60" y1="140" x2="780" y2="140"
+        stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="6 8" />
+  <!-- BC is the actual base segment; we use it as the “parallel BC” reference too. -->
+
+  <!-- Key points (for reference / optional use) -->
+  <circle id="ptE" cx="140" cy="140" r="1" fill="transparent" />
+
+  <!-- Parallelogram edges -->
+  <g id="paraABCD" aria-label="Parallelogram ABCD">
+    <line id="AB" x1="260" y1="140" x2="220" y2="380"
+          stroke="var(--svg-ink)" stroke-width="2" />
+    <line id="BC" x1="220" y1="380" x2="460" y2="380"
+          stroke="var(--svg-ink)" stroke-width="2" />
+    <line id="CD" x1="460" y1="380" x2="500" y2="140"
+          stroke="var(--svg-ink)" stroke-width="2" />
+    <line id="AD" x1="260" y1="140" x2="500" y2="140"
+          stroke="var(--svg-ink)" stroke-width="2" />
+  </g>
+
+  <!-- Triangle EBC (shares BC) -->
+  <g id="triE_parts" aria-label="Triangle EBC">
+    <line id="EB" x1="140" y1="140" x2="220" y2="380"
+          stroke="var(--svg-ink)" stroke-width="2" />
+    <line id="EC" x1="140" y1="140" x2="460" y2="380"
+          stroke="var(--svg-ink)" stroke-width="2" />
+  </g>
+
+  <!-- Diagonal AC (constructed) -->
+  <line id="AC" class="hidden no-draw" aria-hidden="true"
+        x1="260" y1="140" x2="460" y2="380"
+        stroke="#64748b" stroke-width="2.6" stroke-dasharray="6 6" />
+
+  <!-- Explore handle for E (moves along AE) -->
+  <g id="explore-handles" class="hidden" aria-hidden="true">
+    <circle id="handleE_ring" class="handle-ring" cx="140" cy="140" r="14"></circle>
+    <circle id="handleE" class="handle" cx="140" cy="140" r="8"
+            tabindex="0" aria-label="Drag point E along the top parallel"></circle>
+  </g>
+
+  <!-- Labels -->
+  <g id="labels" font-size="18" font-weight="bold" fill="var(--svg-ink)">
+    <text id="lblA" x="252" y="126">A</text>
+    <text id="lblB" x="210" y="405">B</text>
+    <text id="lblC" x="452" y="405">C</text>
+    <text id="lblD" x="492" y="126">D</text>
+    <text id="lblE" x="134" y="130">E</text>
+  </g>
+</svg>
