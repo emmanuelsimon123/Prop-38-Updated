@@ -159,22 +159,26 @@
     .badge.def { color: #0f766e; background: #ecfdf5; border-color: #bbf7d0; }
     .badge.thus { color: #065f46; background: #ecfdf5; border-color: #d1fae5; }
 
-    .has-tooltip { position: relative; cursor: help; text-decoration: underline dotted var(--muted); }
-    .has-tooltip::after {
-      content: attr(data-tooltip);
-      position: absolute; bottom: 130%; right: -10px; left: auto;
-      background: var(--ink); color: var(--bg);
-      padding: 0.75rem 1rem; border-radius: 6px;
-      font-size: 0.95rem; font-weight: 600; white-space: normal;
-      width: max-content; max-width: 320px;
-      opacity: 0; pointer-events: none;
-      transition: opacity 0.2s, bottom 0.2s;
-      z-index: 10; box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-      text-align: left; line-height: 1.5;
-    }
-    .has-tooltip:hover::after,
-    .has-tooltip:focus::after { opacity: 1; bottom: 150%; }
+    /* Keep "tooltip hint" styling, but NO pseudo-tooltip box. */
+    .has-tooltip { cursor: help; text-decoration: underline dotted var(--muted); }
     .has-tooltip:focus { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+    /* Floating tooltip element (created by engine.js) */
+    #floating-tooltip {
+      position: fixed;
+      z-index: 999999;
+      max-width: 340px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.96);
+      color: white;
+      font-size: 14px;
+      line-height: 1.25;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+      pointer-events: none;
+      display: none;
+    }
+    body.dark #floating-tooltip { background: rgba(2, 6, 23, 0.96); }
 
     .geom-ref { font-weight: 900; cursor: pointer; color: var(--accent); transition: color 0.2s, background 0.2s; border-radius: 3px; padding: 0 2px; }
     .geom-ref:hover { color: var(--hilite); background: rgba(239, 68, 68, 0.15); }
