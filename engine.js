@@ -73,6 +73,76 @@ function jaccard(aTokens, bTokens) {
 let LESSON = null;
 
 /* =========================================================
+   Floating tooltip system (fixes tooltips being covered/clipped)
+   Uses existing: <span class="badge has-tooltip" data-tooltip="...">
+========================================================= */
+(function installFloatingTooltips(){
+  let tip = null;
+
+  function ensureTip() {
+    if (tip) return tip;
+    tip = document.createElement('div');
+    tip.id = 'floating-tooltip';
+    tip.style.display = 'none';
+    document.body.appendChild(tip);
+    return tip;
+  }
+
+  function showTip(target) {
+    const text = target?.getAttribute?.('data-tooltip');
+    if (!text) return;
+    const t = ensureTip();
+    t.textContent = text;
+    t.style.display = 'block';
+    positionTip(target);
+  }
+
+  function hideTip() {
+    if (!tip) return;
+    tip.style.display = 'none';
+  }
+
+  function positionTip(target) {
+    if (!tip || tip.style.display === 'none') return;
+    const rect = target.getBoundingClientRect();
+
+    const margin = 10;
+    const tipRect = tip.getBoundingClientRect();
+
+    let left = rect.left + rect.width / 2 - tipRect.width / 2;
+    left = Math.max(margin, Math.min(left, window.innerWidth - tipRect.width - margin));
+
+    let top = rect.top - tipRect.height - 10;
+    if (top < margin) top = rect.bottom + 10;
+
+    tip.style.left = `${left}px`;
+    tip.style.top = `${top}px`;
+  }
+
+  document.addEventListener('pointerover', (e) => {
+    const badge = e.target.closest?.('.badge.has-tooltip');
+    if (!badge) return;
+    showTip(badge);
+  });
+
+  document.addEventListener('pointerout', (e) => {
+    const badge = e.target.closest?.('.badge.has-tooltip');
+    if (!badge) return;
+    hideTip();
+  });
+
+  document.addEventListener('scroll', () => {
+    const active = document.querySelector('.badge.has-tooltip:hover');
+    if (active) positionTip(active);
+  }, true);
+
+  window.addEventListener('resize', () => {
+    const active = document.querySelector('.badge.has-tooltip:hover');
+    if (active) positionTip(active);
+  });
+})();
+
+/* =========================================================
    Diagram Module
 ========================================================= */
 const Diagram = (() => {
@@ -131,8 +201,7 @@ const Diagram = (() => {
     svg?.querySelectorAll('.highlight, .hl-strong, .hl-parallelogram, .hl-tri, .hover-hl')
       .forEach(el => el.classList.remove('highlight','hl-strong','hl-parallelogram','hl-tri','hover-hl'));
 
-    // ✅ EDIT: remove ALL triangle hatch polygons, not just hard-coded names.
-    // This fixes "green colored-in parts" sticking between steps.
+    // FIX: remove ALL triangle hatch polygons so none "stick"
     document.querySelectorAll('polygon[id^="tri"][id$="fill"]').forEach(el => el.remove());
 
     const stamp = document.getElementById('qed-stamp');
