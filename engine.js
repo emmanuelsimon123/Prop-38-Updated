@@ -201,10 +201,9 @@ const Diagram = (() => {
   function addClass(id, ...klasses) { get(id)?.classList.add(...klasses); }
   function removeClass(id, ...klasses) { get(id)?.classList.remove(...klasses); }
 
-  // Keep removal available (in case old hatches exist in the DOM)
   function removeTriangleHatch(name) { document.getElementById(`tri${name}fill`)?.remove(); }
 
-  // ✅ HATCHING DISABLED: do nothing (no green shading)
+  // Hatching disabled (no-op)
   function addTriangleHatch(name) { return; }
 
   function clearHighlights() {
@@ -212,7 +211,6 @@ const Diagram = (() => {
     svg?.querySelectorAll('.highlight, .hl-strong, .hl-parallelogram, .hl-tri, .hover-hl')
       .forEach(el => el.classList.remove('highlight','hl-strong','hl-parallelogram','hl-tri','hover-hl'));
 
-    // Always remove any hatch polygons that might exist from older runs
     document.querySelectorAll('polygon[id^="tri"][id$="fill"]').forEach(el => el.remove());
 
     const stamp = document.getElementById('qed-stamp');
@@ -232,15 +230,15 @@ const Diagram = (() => {
 
 /* =========================================================
    Explore Mode (generic; per-lesson update function)
-   FIX: only listen for pointermove while actively dragging.
+   SCROLL FIX: do NOT install global pointermove with preventDefault.
+   Only track pointermove while dragging, and do not prevent default.
 ========================================================= */
 const Explore = (() => {
   let enabled = false;
   let dragKey = null;
   let dragPointerId = null;
   let draggingEl = null;
-
-  let P = {}; // {A:{x,y}, D:{x,y}, ...}
+  let P = {}; // points
 
   function initFromLesson() {
     P = {};
@@ -268,9 +266,9 @@ const Explore = (() => {
 
   function pointerToSvgPoint(evt) {
     const svg = Diagram.get('diagram');
-    if (!svg) return { x: 0, y: 0 };
+    if (!svg) return {x:0,y:0};
     const ctm = svg.getScreenCTM();
-    if (!ctm) return { x: 0, y: 0 };
+    if (!ctm) return {x:0,y:0};
     const pt = svg.createSVGPoint();
     pt.x = evt.clientX; pt.y = evt.clientY;
     const sp = pt.matrixTransform(ctm.inverse());
@@ -280,10 +278,7 @@ const Explore = (() => {
   function onMove(evt) {
     if (!enabled || !dragKey) return;
 
-    // While dragging, prevent page from scrolling/panning
-    evt.preventDefault();
-
-    const { x, y } = pointerToSvgPoint(evt);
+    const {x,y} = pointerToSvgPoint(evt);
     const h = LESSON.explore.handles[dragKey];
 
     const clampX = h.clampX || [-Infinity, Infinity];
@@ -295,17 +290,12 @@ const Explore = (() => {
     update();
   }
 
-  const MOVE_OPTS = { passive: false };
-
   function stopDrag() {
-    // Remove move listeners so scrolling works normally
-    window.removeEventListener('pointermove', onMove, MOVE_OPTS);
+    window.removeEventListener('pointermove', onMove);
     window.removeEventListener('pointerup', stopDrag);
     window.removeEventListener('pointercancel', stopDrag);
 
-    // Release capture (best-effort)
     try { draggingEl?.releasePointerCapture?.(dragPointerId); } catch (e) {}
-
     dragKey = null;
     dragPointerId = null;
     draggingEl = null;
@@ -317,13 +307,10 @@ const Explore = (() => {
     dragPointerId = evt.pointerId;
     draggingEl = evt.target;
 
-    evt.preventDefault();
-
-    // Capture pointer so drag continues smoothly
     draggingEl?.setPointerCapture?.(evt.pointerId);
 
-    // Only listen while dragging (important for scrolling)
-    window.addEventListener('pointermove', onMove, MOVE_OPTS);
+    // Only listen while dragging
+    window.addEventListener('pointermove', onMove);
     window.addEventListener('pointerup', stopDrag);
     window.addEventListener('pointercancel', stopDrag);
   }
@@ -754,7 +741,7 @@ const Proof = (() => {
     else if (current === -1) setActive(0, { scroll: false });
 
     autoplay = setInterval(() => {
-      if (current >= LESON.steps.length - 1 || !isStepSolved(current)) { stop(); return; }
+      if (current >= LESSON.steps.length - 1 || !isStepSolved(current)) { stop(); return; }
       next({ scroll: true, setHash: true, fromAutoplay: true });
     }, 3300);
 
@@ -992,7 +979,7 @@ const Proof = (() => {
 
       if (e.key === 'Home') setActive(0, { scroll: true, setHash: true });
       if (e.key === 'End') {
-        if (practiceLevel === 0) setActive(LESSON.steps.length - 1, { scroll: true, setHash: true });
+        if (practiceLevel === 0)        if (practiceLevel === 0) setActive(LESSON.steps.length - 1, { scroll: true, setHash: true });
         else setActive(maxAllowedStep(), { scroll: true, setHash: true });
       }
     });
