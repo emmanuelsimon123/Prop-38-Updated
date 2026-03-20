@@ -131,7 +131,9 @@ const Diagram = (() => {
     svg?.querySelectorAll('.highlight, .hl-strong, .hl-parallelogram, .hl-tri, .hover-hl')
       .forEach(el => el.classList.remove('highlight','hl-strong','hl-parallelogram','hl-tri','hover-hl'));
 
-    removeTriangleHatch('ABC'); removeTriangleHatch('DEF');
+    // ✅ EDIT: remove ALL triangle hatch polygons, not just hard-coded names.
+    // This fixes "green colored-in parts" sticking between steps.
+    document.querySelectorAll('polygon[id^="tri"][id$="fill"]').forEach(el => el.remove());
 
     const stamp = document.getElementById('qed-stamp');
     if (stamp) { stamp.classList.add('hidden'); stamp.classList.remove('stamp-drop'); stamp.setAttribute('aria-hidden','true'); }
