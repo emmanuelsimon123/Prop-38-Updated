@@ -90,6 +90,15 @@ const Explore = (() => {
     }
 
     LESSON?.explore?.onUpdate?.(P, Diagram);
+
+    // Re-sync handles after onUpdate may have snapped/projected positions
+    for (const key of Object.keys(handles)) {
+      const h = handles[key];
+      for (const id of [h.handleId, h.ringId].filter(Boolean)) {
+        Diagram.get(id)?.setAttribute('cx', P[key].x);
+        Diagram.get(id)?.setAttribute('cy', P[key].y);
+      }
+    }
   }
 
   function resetPositions() {
