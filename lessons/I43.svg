@@ -1,0 +1,137 @@
+<svg id="diagram" viewBox="0 0 840 520" role="img" aria-labelledby="diagramTitle diagramDesc"
+     xmlns="http://www.w3.org/2000/svg">
+  <title id="diagramTitle">Diagram for Proposition I.43</title>
+  <desc id="diagramDesc">
+    Parallelogram ABCD with diameter AC. Parallelograms AEKH and KGCF lie about the diameter.
+    The complements EBGK and HKFD are shown to be equal in area.
+  </desc>
+
+  <!-- Filled regions (rendered behind lines) -->
+
+  <!-- Complement EBGK (blue/purple) — hidden until revealed -->
+  <polygon id="compEBGK" class="hidden" aria-hidden="true"
+           points="106,224 70,440 250,440 286,224"
+           fill="rgba(96,130,230,0.28)" stroke="none" />
+
+  <!-- Complement HKFD (green) — hidden until revealed -->
+  <polygon id="compHKFD" class="hidden" aria-hidden="true"
+           points="310,80 286,224 556,224 580,80"
+           fill="rgba(72,200,140,0.28)" stroke="none" />
+
+  <!-- Parallelogram AEKH about diameter — hidden until revealed -->
+  <polygon id="paraAEKH" class="hidden" aria-hidden="true"
+           points="130,80 106,224 286,224 310,80"
+           fill="rgba(96,130,230,0.12)" stroke="none" />
+
+  <!-- Parallelogram KGCF about diameter — hidden until revealed -->
+  <polygon id="paraKGCF" class="hidden" aria-hidden="true"
+           points="286,224 250,440 520,440 556,224"
+           fill="rgba(72,200,140,0.12)" stroke="none" />
+
+  <!-- Triangle ABC fill — hidden until revealed -->
+  <polygon id="triABC" class="hidden" aria-hidden="true"
+           points="130,80 70,440 520,440"
+           fill="rgba(180,160,230,0.22)" stroke="none" />
+
+  <!-- Triangle ACD fill — hidden until revealed -->
+  <polygon id="triACD" class="hidden" aria-hidden="true"
+           points="130,80 520,440 580,80"
+           fill="rgba(230,180,100,0.22)" stroke="none" />
+
+  <!-- Triangle AEK fill — hidden until revealed -->
+  <polygon id="triAEK" class="hidden" aria-hidden="true"
+           points="130,80 106,224 286,224"
+           fill="rgba(96,130,230,0.35)" stroke="none" />
+
+  <!-- Triangle AHK fill — hidden until revealed -->
+  <polygon id="triAHK" class="hidden" aria-hidden="true"
+           points="130,80 310,80 286,224"
+           fill="rgba(72,200,140,0.35)" stroke="none" />
+
+  <!-- Triangle KGC fill — hidden until revealed -->
+  <polygon id="triKGC" class="hidden" aria-hidden="true"
+           points="286,224 250,440 520,440"
+           fill="rgba(96,130,230,0.35)" stroke="none" />
+
+  <!-- Triangle KFC fill — hidden until revealed -->
+  <polygon id="triKFC" class="hidden" aria-hidden="true"
+           points="286,224 556,224 520,440"
+           fill="rgba(72,200,140,0.35)" stroke="none" />
+
+  <!-- Outer parallelogram ABCD edges -->
+  <g id="paraABCD" aria-label="Parallelogram ABCD">
+    <line id="AB" x1="130" y1="80" x2="70" y2="440"
+          stroke="var(--svg-ink)" stroke-width="2" />
+    <line id="BC" x1="70" y1="440" x2="520" y2="440"
+          stroke="var(--svg-ink)" stroke-width="2" />
+    <line id="CD" x1="520" y1="440" x2="580" y2="80"
+          stroke="var(--svg-ink)" stroke-width="2" />
+    <line id="DA" x1="580" y1="80" x2="130" y2="80"
+          stroke="var(--svg-ink)" stroke-width="2" />
+  </g>
+
+  <!-- Diagonal AC — hidden until construction step -->
+  <line id="AC" class="hidden" aria-hidden="true"
+        x1="130" y1="80" x2="520" y2="440"
+        stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="6 6" />
+
+  <!-- Inner horizontal parallel EF (E to F through K) — hidden -->
+  <line id="EF" class="hidden" aria-hidden="true"
+        x1="106" y1="224" x2="556" y2="224"
+        stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="4 5" />
+
+  <!-- Segments of EF: EK and KF -->
+  <line id="EK" class="hidden" aria-hidden="true"
+        x1="106" y1="224" x2="286" y2="224"
+        stroke="var(--svg-ink)" stroke-width="2" />
+  <line id="KF" class="hidden" aria-hidden="true"
+        x1="286" y1="224" x2="556" y2="224"
+        stroke="var(--svg-ink)" stroke-width="2" />
+
+  <!-- Inner slanted parallel HG (H to G through K) — hidden -->
+  <line id="HG" class="hidden" aria-hidden="true"
+        x1="310" y1="80" x2="250" y2="440"
+        stroke="var(--svg-grid)" stroke-width="2" stroke-dasharray="4 5" />
+
+  <!-- Segments of HG: HK and KG -->
+  <line id="HK" class="hidden" aria-hidden="true"
+        x1="310" y1="80" x2="286" y2="224"
+        stroke="var(--svg-ink)" stroke-width="2" />
+  <line id="KG" class="hidden" aria-hidden="true"
+        x1="286" y1="224" x2="250" y2="440"
+        stroke="var(--svg-ink)" stroke-width="2" />
+
+  <!-- Outer corner points (always visible) -->
+  <circle id="ptA" cx="130" cy="80"  r="3.2" fill="var(--svg-ink)" />
+  <circle id="ptB" cx="70"  cy="440" r="3.2" fill="var(--svg-ink)" />
+  <circle id="ptC" cx="520" cy="440" r="3.2" fill="var(--svg-ink)" />
+  <circle id="ptD" cx="580" cy="80"  r="3.2" fill="var(--svg-ink)" />
+
+  <!-- Inner points — hidden until revealed -->
+  <circle id="ptE" class="hidden" aria-hidden="true" cx="106" cy="224" r="3.2" fill="var(--svg-ink)" />
+  <circle id="ptF" class="hidden" aria-hidden="true" cx="556" cy="224" r="3.2" fill="var(--svg-ink)" />
+  <circle id="ptG" class="hidden" aria-hidden="true" cx="250" cy="440" r="3.2" fill="var(--svg-ink)" />
+  <circle id="ptH" class="hidden" aria-hidden="true" cx="310" cy="80"  r="3.2" fill="var(--svg-ink)" />
+  <circle id="ptK" class="hidden" aria-hidden="true" cx="286" cy="224" r="3.2" fill="var(--svg-ink)" />
+
+  <!-- Explore handle for K (draggable along diagonal AC) -->
+  <g id="explore-handles" class="hidden" aria-hidden="true">
+    <circle id="handleK_ring" class="handle-ring" cx="286" cy="224" r="14"></circle>
+    <circle id="handleK" class="handle" cx="286" cy="224" r="8"
+            tabindex="0" aria-label="Drag point K along diagonal AC"></circle>
+  </g>
+
+  <!-- Labels -->
+  <g font-size="18" font-weight="bold" fill="var(--svg-ink)">
+    <text id="lblA" x="118" y="70">A</text>
+    <text id="lblB" x="52"  y="464">B</text>
+    <text id="lblC" x="524" y="464">C</text>
+    <text id="lblD" x="584" y="70">D</text>
+
+    <text id="lblE" class="hidden" aria-hidden="true" x="84"  y="228">E</text>
+    <text id="lblF" class="hidden" aria-hidden="true" x="562" y="214">F</text>
+    <text id="lblG" class="hidden" aria-hidden="true" x="254" y="464">G</text>
+    <text id="lblH" class="hidden" aria-hidden="true" x="314" y="70">H</text>
+    <text id="lblK" class="hidden" aria-hidden="true" x="268" y="218">K</text>
+  </g>
+</svg>
